@@ -51,6 +51,8 @@ The interface is simple, fast, and optimized for quick learning sessions.
     Rem  
     Creator, designer, and developer of the DataQuest mini‑game.
 
+🎮 Play Now
+👉 https://projectaccessplus.github.io/Dataquest
 
 
 
