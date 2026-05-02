@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="DataQuest: Analytics Challenge — Trilingual business analytics game">
+<title>DataQuest: Analytics Challenge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --primary:#1a1a2e;--accent:#e94560;--accent2:#0f3460;--accent3:#533483;
+  --gold:#f4c430;--silver:#c0c0c0;--bronze:#cd7f32;
+  --surface:rgba(255,255,255,0.05);--surface2:rgba(255,255,255,0.09);
+  --text:rgba(255,255,255,0.93);--muted:rgba(255,255,255,0.52);
+  --green:#4ade80;--yellow:#facc15;--red:#f87171;--blue:#60a5fa;
+  --border:rgba(255,255,255,0.13);
+  --radius:12px;--font:'Courier New',monospace;
+}
+html,body{height:100%;overflow-x:hidden;background:var(--primary);color:var(--text);font-family:var(--font)}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* HOME */
+#homeScreen{background:linear-gradient(135deg,#0d0d1a 0%,#1a1a2e 40%,#0f3460 100%);align-items:center;justify-content:center;padding:2rem 1.2rem;text-align:center;position:relative;overflow:hidden}
+#homeScreen::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(233,69,96,0.04) 40px,rgba(233,69,96,0.04) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(233,69,96,0.04) 40px,rgba(233,69,96,0.04) 41px);pointer-events:none}
+.logo-wrap{margin-bottom:1.5rem;position:relative;z-index:1}
+.logo-icon{font-size:52px;margin-bottom:0.4rem;filter:drop-shadow(0 0 20px rgba(233,69,96,0.5))}
+.game-title{font-size:clamp(1.6rem,7vw,2.4rem);font-weight:700;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,#e94560,#f4c430,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.game-sub{font-size:0.7rem;letter-spacing:6px;color:var(--muted);margin-top:0.3rem;text-transform:uppercase}
+.lang-switcher{display:flex;gap:8px;margin-bottom:1.5rem;justify-content:center;position:relative;z-index:1}
+.lang-btn{padding:8px 18px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all .2s;letter-spacing:1px;min-height:40px}
+.lang-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.player-setup{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;width:100%;max-width:400px;margin-bottom:1.2rem;position:relative;z-index:1}
+.player-setup label{display:block;font-size:0.68rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.player-setup input{width:100%;background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:var(--font);font-size:1rem;outline:none;transition:border .2s;-webkit-appearance:none}
+.player-setup input:focus{border-color:var(--accent)}
+.rank-preview{display:flex;align-items:center;gap:8px;margin-top:1rem;padding:8px 12px;background:rgba(244,196,48,0.1);border-radius:8px;border:1px solid rgba(244,196,48,0.25)}
+.rank-icon{font-size:1.2rem}
+.rank-name{font-size:0.72rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#c93655);border:none;border-radius:var(--radius);padding:15px 32px;color:#fff;font-family:var(--font);font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:100%;max-width:400px;position:relative;z-index:1;min-height:50px;touch-action:manipulation}
+.btn-primary:active{transform:scale(0.98)}
+.stats-bar{display:flex;gap:24px;margin-top:1.5rem;justify-content:center;position:relative;z-index:1}
+.stat-chip{text-align:center}
+.stat-val{font-size:1.4rem;font-weight:700;color:var(--gold)}
+.stat-lbl{font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+
+/* MODE SELECT */
+#modeScreen{background:var(--primary);padding:1.2rem}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border);gap:10px}
+.xp-bar-wrap{flex:1;min-width:0}
+.xp-bar{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:3px;transition:width .5s}
+.xp-label{font-size:0.62rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;display:flex;justify-content:space-between}
+.player-rank-chip{background:rgba(244,196,48,0.15);border:1px solid rgba(244,196,48,0.3);border-radius:20px;padding:5px 12px;font-size:0.68rem;color:var(--gold);letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:360px){.modes-grid{grid-template-columns:1fr}}
+.mode-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;touch-action:manipulation;min-height:110px}
+.mode-card:active:not(.locked){border-color:var(--accent);transform:scale(0.98)}
+.mode-card.locked{opacity:0.45;cursor:not-allowed}
+.mode-icon{font-size:1.6rem;margin-bottom:0.4rem}
+.mode-title{font-size:0.82rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.3rem}
+.mode-desc{font-size:0.65rem;color:var(--muted);line-height:1.4}
+.mode-badge{position:absolute;top:7px;right:7px;background:var(--accent);color:#fff;font-size:0.55rem;padding:2px 6px;border-radius:10px;letter-spacing:1px}
+.mode-badge.lock{background:rgba(255,255,255,0.15);color:var(--muted)}
+.bottom-nav{display:flex;gap:8px;margin-top:10px}
+.btn-ghost{background:transparent;border:1px solid var(--border);border-radius:var(--radius);padding:11px 8px;color:var(--muted);font-family:var(--font);font-size:0.65rem;cursor:pointer;transition:all .2s;letter-spacing:1px;text-transform:uppercase;flex:1;touch-action:manipulation;min-height:44px}
+.btn-ghost:active{border-color:var(--accent);color:var(--text)}
+
+/* GAME SCREEN */
+#gameScreen{background:var(--primary);padding:1.2rem;flex-direction:column}
+.game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;gap:8px}
+.q-progress{font-size:0.68rem;color:var(--muted);letter-spacing:2px;white-space:nowrap}
+.timer-ring{display:flex;align-items:center;gap:5px}
+.timer-num{font-size:1.1rem;font-weight:700;color:var(--gold);min-width:26px;text-align:right}
+.streak-chip{background:rgba(250,204,21,0.15);border:1px solid rgba(250,204,21,0.3);border-radius:20px;padding:4px 10px;font-size:0.68rem;color:var(--yellow);white-space:nowrap}
+.q-topic{font-size:0.62rem;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:0.6rem}
+.q-difficulty{display:inline-block;padding:3px 10px;border-radius:10px;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.7rem}
+.diff-beginner{background:rgba(74,222,128,0.15);color:var(--green);border:1px solid rgba(74,222,128,0.3)}
+.diff-intermediate{background:rgba(250,204,21,0.15);color:var(--yellow);border:1px solid rgba(250,204,21,0.3)}
+.diff-advanced{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
+.diff-expert{background:rgba(163,63,211,0.15);color:#d18efa;border:1px solid rgba(163,63,211,0.3)}
+.q-text{font-size:0.92rem;line-height:1.65;margin-bottom:1.2rem;min-height:70px}
+.options-grid{display:flex;flex-direction:column;gap:9px;margin-bottom:0.8rem}
+.option-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;color:var(--text);font-family:var(--font);font-size:0.83rem;cursor:pointer;transition:all .15s;text-align:left;line-height:1.4;touch-action:manipulation;min-height:48px;width:100%}
+.option-btn:active:not(:disabled){border-color:var(--accent2);background:rgba(15,52,96,0.4)}
+.option-btn.correct{border-color:var(--green);background:rgba(74,222,128,0.15);color:var(--green)}
+.option-btn.wrong{border-color:var(--red);background:rgba(248,113,113,0.12);color:var(--red)}
+.option-btn.reveal{border-color:var(--green);background:rgba(74,222,128,0.1);color:var(--green)}
+.option-btn:disabled{cursor:not-allowed;opacity:0.85}
+.explain-box{background:rgba(15,52,96,0.4);border:1px solid rgba(96,165,250,0.3);border-radius:var(--radius);padding:0.9rem;font-size:0.76rem;line-height:1.6;color:var(--blue);margin-bottom:0.8rem;display:none}
+.explain-box.show{display:block}
+.btn-next{background:var(--accent2);border:1px solid rgba(96,165,250,0.3);border-radius:var(--radius);padding:13px;color:#fff;font-family:var(--font);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:1px;text-transform:uppercase;display:none;width:100%;min-height:48px;touch-action:manipulation}
+.btn-next.show{display:block}
+.score-live{text-align:center;font-size:0.72rem;color:var(--muted);margin-top:0.5rem}
+
+/* RESULTS */
+#resultScreen{background:linear-gradient(135deg,#0d0d1a,#1a1a2e);padding:2rem 1.2rem;align-items:center;justify-content:center;text-align:center}
+.result-icon{font-size:3.2rem;margin-bottom:0.8rem;animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(0.5)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.result-title{font-size:1.3rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.3rem}
+.result-rank{font-size:0.72rem;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:1.3rem}
+.result-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:400px;margin-bottom:1.2rem}
+.r-stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:0.8rem 0.5rem}
+.r-stat-val{font-size:1.2rem;font-weight:700;color:var(--gold)}
+.r-stat-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.xp-gain{background:rgba(244,196,48,0.12);border:1px solid rgba(244,196,48,0.3);border-radius:var(--radius);padding:0.8rem 1.5rem;font-size:0.88rem;color:var(--gold);margin-bottom:0.8rem;letter-spacing:1px}
+.rank-up-msg{background:linear-gradient(135deg,rgba(233,69,96,0.2),rgba(83,52,131,0.2));border:1px solid var(--accent);border-radius:var(--radius);padding:0.9rem;color:var(--accent);font-size:0.78rem;letter-spacing:1px;margin-bottom:1.2rem;display:none}
+.rank-up-msg.show{display:block}
+.btn-row{display:flex;gap:10px;width:100%;max-width:400px}
+
+/* RANKINGS */
+#rankScreen{background:var(--primary);padding:1.2rem;flex-direction:column}
+.rank-req{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-top:0.8rem}
+.rank-req-title{font-size:0.68rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem}
+.req-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.78rem}
+.req-row:last-child{border-bottom:none}
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:0.8rem}
+.badge-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.55rem;text-align:center}
+.badge-item.earned{border-color:rgba(244,196,48,0.4);background:rgba(244,196,48,0.08)}
+.badge-item.locked{opacity:0.32}
+.badge-ico{font-size:1.3rem;margin-bottom:3px}
+.badge-lbl{font-size:0.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.badge-item.earned .badge-lbl{color:var(--gold)}
+.section-title{font-size:0.68rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin:1rem 0 0.5rem}
+
+/* UTIL */
+.back-btn{background:transparent;border:none;color:var(--muted);font-family:var(--font);font-size:0.72rem;cursor:pointer;letter-spacing:1px;text-transform:uppercase;padding:6px 0;touch-action:manipulation;min-height:36px}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:rgba(30,30,50,0.95);border:1px solid var(--border);border-radius:var(--radius);padding:10px 20px;font-size:0.78rem;color:var(--text);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(10px);max-width:90vw}
+.toast.show{opacity:1}
+.combo-flash{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);font-size:1.4rem;font-weight:700;color:var(--gold);z-index:9998;opacity:0;transition:all .4s;pointer-events:none;letter-spacing:3px;text-transform:uppercase}
+.combo-flash.show{opacity:1;transform:translate(-50%,-65%)}
+#progressBar{height:3px;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .3s;position:fixed;top:0;left:0;z-index:9997;width:0%}
+</style>
+</head>
+<body>
+<div id="progressBar"></div>
+<div id="toast" class="toast"></div>
+<div id="comboFlash" class="combo-flash"></div>
+
+<!-- HOME -->
+<div id="homeScreen" class="screen active">
+  <div class="logo-wrap">
+    <div class="logo-icon">📊</div>
+    <div class="game-title" id="homeTitle">DataQuest</div>
+    <div class="game-sub" id="homeSub">Analytics Challenge</div>
+  </div>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ar')">عربي</button>
+    <button class="lang-btn" onclick="setLang('fil')">FIL</button>
+  </div>
+  <div class="player-setup">
+    <label id="nameLabel">Your Name</label>
+    <input id="playerName" type="text" maxlength="20" placeholder="Enter your name..." autocomplete="off">
+    <div class="rank-preview">
+      <span class="rank-icon">🎓</span>
+      <span class="rank-name" id="startRankLabel">Trainee Analyst</span>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="startGame()" id="startBtn">▶ START GAME</button>
+  <div class="stats-bar">
+    <div class="stat-chip"><div class="stat-val" id="totalXP">0</div><div class="stat-lbl" id="answeredLbl2">XP</div></div>
+    <div class="stat-chip"><div class="stat-val" id="totalQ">0</div><div class="stat-lbl" id="answeredLbl">Answered</div></div>
+    <div class="stat-chip"><div class="stat-val" id="totalStreak">0</div><div class="stat-lbl">Best Streak</div></div>
+  </div>
+</div>
+
+<!-- MODE SELECT -->
+<div id="modeScreen" class="screen">
+  <div class="top-bar">
+    <div style="min-width:0">
+      <div style="font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase" id="modeGreet">Welcome back</div>
+      <div style="font-size:0.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="modePlayer">Player</div>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-label"><span id="xpBarLabel">XP</span><span id="xpBarVal">0</span></div>
+      <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    </div>
+    <div class="player-rank-chip" id="modeRankChip">🎓 Trainee</div>
+  </div>
+  <div class="modes-grid" id="modesGrid"></div>
+  <div class="bottom-nav">
+    <button class="btn-ghost" onclick="showScreen('rankScreen')" id="navRanking">🏆 Rankings</button>
+    <button class="btn-ghost" onclick="showScreen('rankScreen')" id="navBadges">🎖 Badges</button>
+    <button class="btn-ghost" onclick="showScreen('homeScreen')" id="navHome">⚙ Settings</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="quitGame()" id="backBtn">← Back</button>
+    <div class="q-progress"><span id="qNum">1</span>/<span id="qTotal">10</span></div>
+    <div class="timer-ring"><span style="font-size:0.68rem;color:var(--muted)">⏱</span><span class="timer-num" id="timerNum">30</span></div>
+    <div class="streak-chip" id="streakChip">🔥 0</div>
+  </div>
+  <div id="progressQBar" style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-bottom:0.8rem;overflow:hidden"><div id="progressQFill" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width .3s;width:0%"></div></div>
+  <div class="q-topic" id="qTopic">Statistics</div>
+  <div class="q-difficulty diff-beginner" id="qDiff">Beginner</div>
+  <div class="q-text" id="qText">Loading...</div>
+  <div class="options-grid" id="optionsGrid"></div>
+  <div class="explain-box" id="explainBox"></div>
+  <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
+  <div class="score-live" id="scoreLive">Score: 0 pts</div>
+</div>
+
+<!-- RESULTS -->
+<div id="resultScreen" class="screen">
+  <div class="result-icon" id="resultIcon">🏆</div>
+  <div class="result-title" id="resultTitle">Round Complete!</div>
+  <div class="result-rank" id="resultRank">Junior Analyst</div>
+  <div class="result-stats">
+    <div class="r-stat"><div class="r-stat-val" id="rScore">0</div><div class="r-stat-lbl" id="rScoreLbl">Score</div></div>
+    <div class="r-stat"><div class="r-stat-val" id="rCorrect">0/0</div><div class="r-stat-lbl" id="rCorrectLbl">Correct</div></div>
+    <div class="r-stat"><div class="r-stat-val" id="rAccuracy">0%</div><div class="r-stat-lbl" id="rAccLbl">Accuracy</div></div>
+  </div>
+  <div class="xp-gain" id="xpGain">+0 XP Earned</div>
+  <div class="rank-up-msg" id="rankUpMsg">🎉 RANK UP!</div>
+  <div class="btn-row">
+    <button class="btn-ghost" onclick="showScreen('modeScreen')" id="btnModes" style="flex:1">Modes</button>
+    <button class="btn-primary" onclick="replayMode()" id="btnReplay" style="flex:1.5;max-width:none">▶ Play Again</button>
+  </div>
+</div>
+
+<!-- RANKINGS & BADGES -->
+<div id="rankScreen" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('modeScreen')">← Back</button>
+    <div style="font-size:0.95rem;font-weight:700" id="rankScreenTitle">Rankings</div>
+    <div></div>
+  </div>
+  <div class="rank-req">
+    <div class="rank-req-title" id="rankTableTitle">Rank Progression</div>
+    <div id="rankTableRows"></div>
+  </div>
+  <div class="section-title" id="badgesTitle">Your Badges</div>
+  <div class="badges-grid" id="badgesGrid"></div>
+</div>
+
+<script>
+const T={
+  en:{title:"DataQuest",sub:"Analytics Challenge",nameLabel:"Your Name",startBtn:"▶ START GAME",answeredLbl:"Answered",modeGreet:"Welcome back",navRanking:"🏆 Rankings",navBadges:"🎖 Badges",navHome:"⚙ Settings",resultTitle:"Round Complete!",rScoreLbl:"Score",rCorrectLbl:"Correct",rAccLbl:"Accuracy",xpGain:"XP Earned",btnModes:"Modes",btnReplay:"▶ Play Again",rankScreenTitle:"Rankings",badgesTitle:"Your Badges",rankTableTitle:"Rank Progression",correct:"✓ Correct!",wrong:"✗ Incorrect!",timeout:"⏱ Time's up!",nextBtn:"Next →",backBtn:"← Back",difficulty:["Beginner","Intermediate","Advanced","Expert"],rankNames:["Trainee Analyst","Junior Analyst","Analyst","Senior Analyst","Data Scientist","Chief Analytics Officer"],modes:[{icon:"⚡",title:"Quick Quiz",desc:"10 random questions, 30s each. Test your speed!",badge:"HOT"},{icon:"💼",title:"Scenario Mode",desc:"Business case studies. Real-world analytics decisions.",badge:""},{icon:"🔬",title:"Stats Lab",desc:"ANOVA, regression, hypothesis testing deep dives.",badge:""},{icon:"🕵️",title:"Data Detective",desc:"Solve a full business analytics mystery.",badge:"NEW"},{icon:"⏱",title:"Time Attack",desc:"Answer as many as possible in 60 seconds!",badge:"FAST"},{icon:"👑",title:"Boss Level",desc:"Expert-only challenge. Unlock at Senior Analyst.",badge:"🔒",locked:true}]},
+  ar:{title:"داتاكويست",sub:"تحدي التحليلات",nameLabel:"اسمك",startBtn:"▶ ابدأ اللعبة",answeredLbl:"مُجاب",modeGreet:"مرحباً بعودتك",navRanking:"🏆 التصنيف",navBadges:"🎖 الشارات",navHome:"⚙ الإعدادات",resultTitle:"انتهت الجولة!",rScoreLbl:"النقاط",rCorrectLbl:"صحيح",rAccLbl:"الدقة",xpGain:"نقاط XP مكتسبة",btnModes:"الأوضاع",btnReplay:"▶ العب مجددًا",rankScreenTitle:"التصنيفات",badgesTitle:"شاراتك",rankTableTitle:"تدرج الرتب",correct:"✓ صحيح!",wrong:"✗ خطأ!",timeout:"⏱ انتهى الوقت!",nextBtn:"التالي →",backBtn:"← رجوع",difficulty:["مبتدئ","متوسط","متقدم","خبير"],rankNames:["محلل متدرب","محلل مبتدئ","محلل","محلل أول","عالم بيانات","مدير التحليلات"],modes:[{icon:"⚡",title:"اختبار سريع",desc:"10 أسئلة عشوائية، 30 ثانية لكل سؤال.",badge:"HOT"},{icon:"💼",title:"وضع السيناريو",desc:"دراسات حالة تجارية حقيقية.",badge:""},{icon:"🔬",title:"مختبر الإحصاء",desc:"أنوفا والانحدار واختبارات الفرضيات.",badge:""},{icon:"🕵️",title:"المحقق الإحصائي",desc:"حل لغز تحليل بيانات كامل.",badge:"جديد"},{icon:"⏱",title:"هجوم الوقت",desc:"أجب على أكبر عدد في 60 ثانية!",badge:"سريع"},{icon:"👑",title:"مستوى الزعيم",desc:"تحدي الخبراء فقط.",badge:"🔒",locked:true}]},
+  fil:{title:"DataQuest",sub:"Analytics Challenge",nameLabel:"Iyong Pangalan",startBtn:"▶ MAGLARO",answeredLbl:"Nasagot",modeGreet:"Maligayang pagbabalik",navRanking:"🏆 Ranggo",navBadges:"🎖 Badges",navHome:"⚙ Settings",resultTitle:"Tapos na ang Round!",rScoreLbl:"Puntos",rCorrectLbl:"Tama",rAccLbl:"Katumpakan",xpGain:"XP na Nakuha",btnModes:"Modes",btnReplay:"▶ Maglaro Ulit",rankScreenTitle:"Ranggo",badgesTitle:"Iyong Badges",rankTableTitle:"Pag-unlad ng Ranggo",correct:"✓ Tama!",wrong:"✗ Mali!",timeout:"⏱ Naubos ang oras!",nextBtn:"Susunod →",backBtn:"← Bumalik",difficulty:["Simula","Katamtaman","Advanced","Eksperto"],rankNames:["Trainee Analyst","Junior Analyst","Analyst","Senior Analyst","Data Scientist","Chief Analytics Officer"],modes:[{icon:"⚡",title:"Quick Quiz",desc:"10 random na tanong, 30s bawat isa.",badge:"HOT"},{icon:"💼",title:"Scenario Mode",desc:"Business case studies. Tunay na desisyon sa analytics.",badge:""},{icon:"🔬",title:"Stats Lab",desc:"ANOVA, regression, hypothesis testing.",badge:""},{icon:"🕵️",title:"Data Detective",desc:"Lutasin ang isang buong business analytics mystery.",badge:"BAGO"},{icon:"⏱",title:"Time Attack",desc:"Sagutin ang pinakamaraming tanong sa 60 segundo!",badge:"MABILIS"},{icon:"👑",title:"Boss Level",desc:"Para sa mga eksperto lamang.",badge:"🔒",locked:true}]}
+};
+
+const RANKS=[{name_key:0,xp:0,icon:"🎓"},{name_key:1,xp:200,icon:"📋"},{name_key:2,xp:500,icon:"📊"},{name_key:3,xp:1000,icon:"📈"},{name_key:4,xp:2000,icon:"🤖"},{name_key:5,xp:4000,icon:"👑"}];
+const BADGES=[{id:"first_blood",icon:"🩸",label:"First Blood"},{id:"streak5",icon:"🔥",label:"On Fire"},{id:"streak10",icon:"💥",label:"Unstoppable"},{id:"perfect",icon:"⭐",label:"Perfect"},{id:"speedster",icon:"⚡",label:"Speedster"},{id:"scholar",icon:"📚",label:"Scholar"},{id:"centurion",icon:"💯",label:"Centurion"},{id:"stats_master",icon:"📉",label:"Stats Master"},{id:"detective",icon:"🔍",label:"Detective"},{id:"ranker",icon:"🏅",label:"Ranked Up"},{id:"marathon",icon:"🏃",label:"Marathon"},{id:"combo_king",icon:"👑",label:"Combo King"}];
+
+const Q=[
+  {t:"Descriptive Stats",d:0,en:"What does the mean of a dataset represent?",ar:"ماذا يمثل المتوسط الحسابي لمجموعة البيانات؟",fil:"Ano ang kinakatawan ng mean ng isang dataset?",o:["en:The most frequent value|ar:القيمة الأكثر تكراراً|fil:Ang pinakapalaging halaga","en:The middle value when sorted|ar:القيمة الوسطى بعد الترتيب|fil:Ang gitnang halaga kapag naayos","en:The average of all values|ar:المتوسط الحسابي لجميع القيم|fil:Ang average ng lahat ng halaga","en:The range divided by 2|ar:المدى مقسوماً على 2|fil:Ang range na hinati sa 2"],a:2,ex:"en:The mean is calculated by summing all values and dividing by the count.|ar:المتوسط الحسابي يُحسب بجمع جميع القيم وقسمتها على عددها.|fil:Ang mean ay kinukuha sa pamamagitan ng pagdaragdag ng lahat ng halaga at paghahati sa bilang."},
+  {t:"Probability",d:0,en:"A fair coin is flipped once. What is P(Heads)?",ar:"عند قلب عملة نقدية مرة واحدة، ما احتمال الحصول على وجه؟",fil:"Isang patas na barya ang ibinalik nang minsan. Ano ang P(Ulo)?",o:["en:0.25|ar:0.25|fil:0.25","en:0.50|ar:0.50|fil:0.50","en:0.75|ar:0.75|fil:0.75","en:1.00|ar:1.00|fil:1.00"],a:1,ex:"en:A fair coin has 2 equal outcomes. P(Heads) = 1/2 = 0.50|ar:عملة عادلة لها نتيجتان متساويتان. الاحتمال = 0.50|fil:Isang patas na barya ay may 2 pantay na resulta. P(Ulo) = 0.50"},
+  {t:"Data Types",d:0,en:"Which of these is an example of categorical data?",ar:"أيٌّ من هذه أمثلة على البيانات الفئوية؟",fil:"Alin sa mga ito ang halimbawa ng categorical data?",o:["en:Temperature in °C|ar:درجة الحرارة|fil:Temperatura sa °C","en:Employee age|ar:عمر الموظف|fil:Edad ng empleyado","en:Department (HR, Sales, IT)|ar:القسم (موارد بشرية، مبيعات)|fil:Departamento (HR, Sales, IT)","en:Monthly revenue|ar:الإيرادات الشهرية|fil:Buwanang kita"],a:2,ex:"en:Categorical data represents groups or labels, not numbers. Department names are categories.|ar:البيانات الفئوية تمثل مجموعات، وليس أرقاماً. أسماء الأقسام فئات.|fil:Ang categorical data ay kumakatawan sa mga grupo o label, hindi numero."},
+  {t:"Descriptive Stats",d:0,en:"In the dataset 3,3,3,7,9,11,11 — what is the mode?",ar:"في مجموعة البيانات: 3،3،3،7،9،11،11 — ما المنوال؟",fil:"Sa dataset: 3,3,3,7,9,11,11 — ano ang mode?",o:["en:7|ar:7|fil:7","en:3|ar:3|fil:3","en:11|ar:11|fil:11","en:9|ar:9|fil:9"],a:1,ex:"en:Mode is the most frequently occurring value. 3 appears 3 times.|ar:المنوال هو القيمة الأكثر تكراراً. 3 تظهر 3 مرات.|fil:Ang mode ay ang pinakapalaging lumalabas na halaga. Lumabas ang 3 nang 3 beses."},
+  {t:"KPI",d:0,en:"KPI stands for:",ar:"KPI تعني:",fil:"Ang KPI ay nangangahulugang:",o:["en:Key Performance Indicator|ar:مؤشر الأداء الرئيسي|fil:Key Performance Indicator","en:Key Process Integration|ar:تكامل العمليات الرئيسية|fil:Key Process Integration","en:Key Predictive Index|ar:المؤشر التنبؤي الرئيسي|fil:Key Predictive Index","en:Knowledge Process Implementation|ar:تطبيق عملية المعرفة|fil:Knowledge Process Implementation"],a:0,ex:"en:KPI = Key Performance Indicator. It measures how effectively an organization achieves objectives.|ar:KPI = مؤشر الأداء الرئيسي. يقيس مدى فاعلية المنظمة في تحقيق أهدافها.|fil:Ang KPI = Key Performance Indicator. Sinusukat kung gaano kahusay ang organisasyon."},
+  {t:"Descriptive Stats",d:0,en:"Which measure of central tendency is most affected by outliers?",ar:"أي مقياس للنزعة المركزية يتأثر أكثر بالقيم الشاذة؟",fil:"Aling sukatan ng sentral na tendensya ang pinakaapektado ng mga outlier?",o:["en:Mode|ar:المنوال|fil:Mode","en:Median|ar:الوسيط|fil:Median","en:Mean|ar:المتوسط الحسابي|fil:Mean","en:Range|ar:المدى|fil:Range"],a:2,ex:"en:The mean uses all values in calculation, so extreme outliers pull it significantly. Median is resistant.|ar:المتوسط يستخدم جميع القيم، لذا تؤثر القيم الشاذة عليه بشكل كبير. الوسيط مقاوم.|fil:Ang mean ay gumagamit ng lahat ng halaga, kaya ang mga outlier ay lubhang nakakaimpluwensya."},
+  {t:"Probability",d:0,en:"Rolling a fair 6-sided die: what is P(rolling a 4)?",ar:"عند رمي حجر نرد عادي: ما احتمال الحصول على 4؟",fil:"Sa paghagis ng 6-sided na dice: ano ang P(makuha ang 4)?",o:["en:1/4|ar:1/4|fil:1/4","en:1/3|ar:1/3|fil:1/3","en:1/6|ar:1/6|fil:1/6","en:1/2|ar:1/2|fil:1/2"],a:2,ex:"en:A fair die has 6 equally likely outcomes. Only one shows '4', so P(4) = 1/6 ≈ 0.167|ar:حجر النرد له 6 نتائج متساوية. رقم واحد يُظهر '4'، P(4) = 1/6|fil:Ang patas na dice ay may 6 pantay na resulta. P(4) = 1/6"},
+  {t:"Data Visualization",d:0,en:"A pie chart is best used to show:",ar:"يُستخدم المخطط الدائري لإظهار:",fil:"Ang pie chart ay pinakamainam gamitin upang ipakita ang:",o:["en:Trends over time|ar:الاتجاهات عبر الزمن|fil:Mga trend sa panahon","en:Proportions of a whole|ar:نسب أجزاء الكل|fil:Mga proporsyon ng kabuuan","en:Correlation between variables|ar:الارتباط بين المتغيرات|fil:Ugnayan ng mga variable","en:Distribution of values|ar:توزيع القيم|fil:Distribusyon ng halaga"],a:1,ex:"en:Pie charts show proportional composition. Each slice = part of the whole (100%).|ar:المخططات الدائرية تُظهر التكوين النسبي. كل شريحة = جزء من الكل.|fil:Ang pie chart ay nagpapakita ng proporsyonal na komposisyon."},
+  {t:"Business Analytics",d:0,en:"What does 'descriptive analytics' do?",ar:"ماذا تفعل 'التحليلات الوصفية'؟",fil:"Ano ang ginagawa ng 'descriptive analytics'?",o:["en:Predicts future outcomes|ar:تتنبأ بالمستقبل|fil:Hinuhulaan ang hinaharap","en:Prescribes optimal actions|ar:تُوصي بإجراءات مثلى|fil:Nagreseta ng aksyon","en:Summarizes historical data|ar:تلخص البيانات التاريخية|fil:Nagbubuod ng makasaysayang datos","en:Diagnoses root causes|ar:تشخّص الأسباب الجذرية|fil:Nagdi-diagnose ng sanhi"],a:2,ex:"en:Descriptive analytics answers 'What happened?' by summarizing historical data using statistics and charts.|ar:تجيب على 'ماذا حدث؟' بتلخيص البيانات التاريخية باستخدام الإحصاء والمخططات.|fil:Ang descriptive analytics ay sumasagot sa 'Ano ang nangyari?' sa pamamagitan ng pagbubuod ng datos."},
+  {t:"Descriptive Stats",d:0,en:"Standard deviation measures:",ar:"الانحراف المعياري يقيس:",fil:"Ang standard deviation ay sumusukat ng:",o:["en:The average value|ar:المتوسط الحسابي|fil:Ang average na halaga","en:The most common value|ar:القيمة الأكثر شيوعاً|fil:Ang pinakakaraniwang halaga","en:The spread/variability around the mean|ar:الانتشار حول المتوسط|fil:Ang pagkalat sa paligid ng mean","en:The difference between max and min|ar:الفرق بين الحد الأقصى والأدنى|fil:Ang pagkakaiba ng max at min"],a:2,ex:"en:Standard deviation quantifies how spread out values are from the mean. High SD = high variability.|ar:يُحدد مدى انتشار القيم عن المتوسط. انحراف عالٍ = تباين عالٍ.|fil:Sinusukat ng standard deviation kung gaano kalayo ang mga halaga mula sa mean."},
+  {t:"Correlation",d:1,en:"A correlation coefficient of r = -0.85 indicates:",ar:"معامل الارتباط r = -0.85 يدل على:",fil:"Ang correlation coefficient na r = -0.85 ay nagpapahiwatig ng:",o:["en:Strong positive relationship|ar:علاقة إيجابية قوية|fil:Matibay na positibong relasyon","en:No relationship|ar:لا توجد علاقة|fil:Walang relasyon","en:Strong negative relationship|ar:علاقة سلبية قوية|fil:Matibay na negatibong relasyon","en:Weak negative relationship|ar:علاقة سلبية ضعيفة|fil:Mahinang negatibong relasyon"],a:2,ex:"en:r close to -1 = strong negative correlation. As one variable increases, the other decreases strongly.|ar:r قريب من -1 = ارتباط سلبي قوي. كلما زاد أحد المتغيرين، انخفض الآخر بشدة.|fil:Ang r na malapit sa -1 = matibay na negatibong korelasyon."},
+  {t:"Hypothesis Testing",d:1,en:"A p-value of 0.03 with α=0.05 means:",ar:"قيمة p = 0.03 مع α=0.05 تعني:",fil:"Ang p-value na 0.03 na may α=0.05 ay nangangahulugang:",o:["en:Fail to reject the null hypothesis|ar:نفشل في رفض الفرضية الصفرية|fil:Nabigo sa pagtanggi ng null hypothesis","en:Reject the null hypothesis|ar:رفض الفرضية الصفرية|fil:Tanggihan ang null hypothesis","en:Accept the alternative with certainty|ar:قبول البديل بيقين|fil:Tanggapin ang alternatibo nang may katiyakan","en:The test is inconclusive|ar:الاختبار غير حاسم|fil:Walang konklusyon ang pagsubok"],a:1,ex:"en:Since p-value (0.03) < α (0.05), we reject H₀. Statistically significant evidence against null hypothesis.|ar:بما أن p-value (0.03) < α (0.05)، نرفض H₀.|fil:Dahil ang p-value (0.03) < α (0.05), tinatanggihan ang H₀."},
+  {t:"Regression",d:1,en:"In Y = 2X + 5, what happens to Y when X increases by 1?",ar:"في Y = 2X + 5، ماذا يحدث لـY عندما يزيد X بمقدار 1؟",fil:"Sa Y = 2X + 5, ano ang mangyayari sa Y kapag tumaas ang X ng 1?",o:["en:Y increases by 5|ar:Y يزيد بـ5|fil:Tataas ang Y ng 5","en:Y increases by 2|ar:Y يزيد بـ2|fil:Tataas ang Y ng 2","en:Y decreases by 2|ar:Y ينخفض بـ2|fil:Bababa ang Y ng 2","en:Y stays the same|ar:Y يبقى كما هو|fil:Mananatiling pareho ang Y"],a:1,ex:"en:The slope (2) means: for every 1-unit increase in X, Y increases by 2. The intercept (5) is Y when X=0.|ar:معامل الميل (2): لكل زيادة وحدة في X، يزيد Y بمقدار 2. القاطع (5) هو Y عندما X=0.|fil:Ang slope (2): para sa bawat pagtaas ng 1 sa X, tataas ang Y ng 2."},
+  {t:"ANOVA",d:1,en:"ANOVA tests differences in means across:",ar:"تختبر ANOVA الاختلافات في المتوسطات عبر:",fil:"Sinusuri ng ANOVA ang mga pagkakaiba sa mga mean sa:",o:["en:Two variables|ar:متغيرين|fil:Dalawang variable","en:Two groups only|ar:مجموعتين فقط|fil:Dalawang grupo lamang","en:Three or more groups|ar:ثلاث مجموعات أو أكثر|fil:Tatlo o higit pang grupo","en:One variable|ar:متغير واحد|fil:Isang variable"],a:2,ex:"en:ANOVA tests whether means differ significantly across 3+ groups, avoiding inflated error from multiple t-tests.|ar:تختبر ANOVA ما إذا كانت المتوسطات تختلف معنوياً عبر 3+ مجموعات.|fil:Sinusuri ng ANOVA kung ang mga mean ay makabuluhang naiiba sa 3+ grupo."},
+  {t:"Forecasting",d:1,en:"Best method for a time series with clear seasonal patterns?",ar:"أفضل طريقة للتنبؤ بسلسلة زمنية ذات أنماط موسمية واضحة؟",fil:"Pinakamainam na pamamaraan para sa time series na may seasonal patterns?",o:["en:Simple moving average|ar:المتوسط المتحرك البسيط|fil:Simple moving average","en:Seasonal decomposition|ar:التحليل الموسمي|fil:Seasonal decomposition","en:Simple regression|ar:الانحدار البسيط|fil:Simple regression","en:Frequency distribution|ar:التوزيع التكراري|fil:Frequency distribution"],a:1,ex:"en:Seasonal decomposition separates trend, seasonal, and residual components — ideal for repeating seasonal patterns.|ar:التحليل الموسمي يفصل مكونات: الاتجاه والموسمية والبواقي.|fil:Ang seasonal decomposition ay naghihiwalay ng trend, seasonal, at residual na bahagi."},
+  {t:"Business Analytics",d:1,en:"Customer churn rate of 5% monthly means:",ar:"معدل تسرب العملاء 5% شهرياً يعني:",fil:"Ang customer churn rate na 5% buwanan ay nangangahulugang:",o:["en:5% of customers refer others monthly|ar:5% من العملاء يحيلون آخرين|fil:5% ng mga customer ay nagrerekomenda","en:5% of customers are lost each month|ar:5% من العملاء يُفقدون كل شهر|fil:5% ng mga customer ay nawawala bawat buwan","en:Revenue grows 5% per month|ar:الإيرادات تنمو 5% شهرياً|fil:Lumalaki ang kita ng 5% bawat buwan","en:5% customer satisfaction rate|ar:معدل رضا 5%|fil:5% customer satisfaction rate"],a:1,ex:"en:Churn rate = % of customers who stop doing business in a period. 5% monthly ≈ 46% annual loss.|ar:معدل التسرب = نسبة العملاء الذين يتوقفون. 5% شهرياً ≈ 46% سنوياً.|fil:Churn rate = porsyento ng mga customer na tumigil. 5% buwanan ≈ 46% taunang pagkawala."},
+  {t:"Data Visualization",d:1,en:"A scatter plot with an upward trend suggests:",ar:"مخطط النقاط ذو الاتجاه الصاعد يقترح:",fil:"Ang scatter plot na may pataas na trend ay nagmumungkahi ng:",o:["en:Negative correlation|ar:ارتباط سلبي|fil:Negatibong korelasyon","en:No correlation|ar:عدم وجود ارتباط|fil:Walang korelasyon","en:Positive correlation|ar:ارتباط إيجابي|fil:Positibong korelasyon","en:Non-linear relationship|ar:علاقة غير خطية|fil:Hindi linear na relasyon"],a:2,ex:"en:When both variables increase together (upward slope), they show positive correlation.|ar:عندما تزيد كلا المتغيرين معاً، يُظهران ارتباطاً إيجابياً.|fil:Kapag parehong tumataas ang dalawang variable, nagpapakita ng positibong korelasyon."},
+  {t:"HR Analytics",d:1,en:"In a 100-person company, a 25% annual turnover rate means how many employees left?",ar:"في شركة من 100 موظف، معدل دوران 25% سنوياً يعني كم موظفاً غادر؟",fil:"Sa 100-taong kumpanya, ang 25% turnover rate ay nangangahulugang ilang empleyado ang umalis?",o:["en:10|ar:10|fil:10","en:15|ar:15|fil:15","en:25|ar:25|fil:25","en:50|ar:50|fil:50"],a:2,ex:"en:Turnover = (employees who left / headcount) × 100. 25% × 100 = 25 employees left.|ar:معدل الدوران = (المغادرون / إجمالي الموظفين) × 100. 25% × 100 = 25 موظفاً.|fil:Turnover = (umalis / bilang) × 100. 25% × 100 = 25 empleyado."},
+  {t:"Statistics",d:1,en:"The 95% confidence interval means:",ar:"فترة الثقة 95% تعني:",fil:"Ang 95% confidence interval ay nangangahulugang:",o:["en:The sample is 95% accurate|ar:العينة دقيقة بنسبة 95%|fil:Ang sample ay 95% tumpak","en:95% chance the true parameter falls within this range|ar:احتمال 95% أن المعامل الحقيقي يقع ضمن هذا النطاق|fil:95% na pagkakataon na ang tunay na parameter ay nasa loob ng range","en:95% of data points fall within the interval|ar:95% من نقاط البيانات ضمن الفترة|fil:95% ng data points ay nasa loob ng interval","en:P-value equals 0.95|ar:قيمة p تساوي 0.95|fil:Ang p-value ay 0.95"],a:1,ex:"en:A 95% CI: if sampling repeated 100 times, ~95 intervals would contain the true population parameter.|ar:فترة الثقة 95%: لو كررنا العينات 100 مرة، ~95 منها ستحتوي على المعامل الحقيقي.|fil:Ang 95% CI: kung uulitin ang sampling ng 100 beses, ~95 sa mga interval ay maglalaman ng tunay na parameter."},
+  {t:"Descriptive Stats",d:1,en:"If mean=50 and median=30, the distribution is likely:",ar:"إذا كان المتوسط=50 والوسيط=30، فالتوزيع على الأرجح:",fil:"Kung mean=50 at median=30, ang distribusyon ay malamang na:",o:["en:Symmetric|ar:متماثل|fil:Simetrikal","en:Negatively skewed|ar:منحرف سلبياً|fil:Negatibong skewed","en:Positively skewed|ar:منحرف إيجابياً|fil:Positibong skewed","en:Bimodal|ar:ثنائي الذروة|fil:Bimodal"],a:2,ex:"en:When mean > median, distribution is positively (right) skewed. Large right-tail outliers pull the mean up.|ar:عندما المتوسط > الوسيط، التوزيع منحرف إيجابياً. القيم الشاذة الكبيرة على اليمين ترفع المتوسط.|fil:Kapag ang mean > median, positibong skewed ang distribusyon."},
+  {t:"ANOVA",d:2,en:"In one-way ANOVA, the F-statistic is:",ar:"في ANOVA أحادي الاتجاه، إحصائية F هي:",fil:"Sa one-way ANOVA, ang F-statistic ay:",o:["en:Variance within / Variance between|ar:التباين الداخلي / التباين الخارجي|fil:Variance within / Variance between","en:Variance between / Variance within|ar:التباين بين المجموعات / التباين داخلها|fil:Variance between / Variance within","en:SS Total / SS Error|ar:مجموع المربعات الكلي / مجموع مربعات الخطأ|fil:SS Total / SS Error","en:SD × sample size|ar:الانحراف المعياري × حجم العينة|fil:SD × sample size"],a:1,ex:"en:F = MSB/MSW. Large F means between-group variation > within-group, indicating significant differences.|ar:F = MSB/MSW. قيمة F الكبيرة تعني أن التباين بين المجموعات أكبر من التباين الداخلي.|fil:F = MSB/MSW. Ang malaking F ay nagpapahiwatig ng makabuluhang pagkakaiba sa pagitan ng mga grupo."},
+  {t:"Regression",d:2,en:"Multicollinearity in multiple regression refers to:",ar:"التعدد الخطي في الانحدار المتعدد يشير إلى:",fil:"Ang multicollinearity sa multiple regression ay tumutukoy sa:",o:["en:Dependent variable has multiple modes|ar:المتغير التابع له منوالات متعددة|fil:Ang dependent variable ay may maraming mode","en:Independent variables are highly correlated with each other|ar:المتغيرات المستقلة مرتبطة بشكل عالٍ ببعضها|fil:Ang mga independent variable ay mataas ang korelasyon sa isa't isa","en:Residuals are not normally distributed|ar:البواقي لا تتوزع طبيعياً|fil:Ang mga residual ay hindi normal na namamahagi","en:Sample size is too small|ar:حجم العينة صغير جداً|fil:Ang sample size ay masyadong maliit"],a:1,ex:"en:Multicollinearity: predictors are highly correlated — hard to isolate individual effects. VIF > 10 is concerning.|ar:التعدد الخطي: المتوقعات مرتبطة ارتباطاً عالياً — يصعب عزل التأثيرات الفردية.|fil:Ang multicollinearity: ang mga predictor ay mataas ang korelasyon."},
+  {t:"Hypothesis Testing",d:2,en:"A Type I error occurs when:",ar:"خطأ النوع الأول يحدث عندما:",fil:"Ang Type I error ay nangyayari kapag:",o:["en:You fail to reject a false null|ar:تفشل في رفض فرضية صفرية خاطئة|fil:Nabigo kang tanggihan ang maling null","en:You reject a true null hypothesis|ar:ترفض الفرضية الصفرية الصحيحة|fil:Tinanggihan mo ang tamang null hypothesis","en:Sample size is too small|ar:حجم العينة صغير جداً|fil:Ang sample size ay masyadong maliit","en:P-value exceeds significance level|ar:تتجاوز قيمة p مستوى الأهمية|fil:Ang p-value ay lumagpas sa significance level"],a:1,ex:"en:Type I = false positive (rejecting H₀ when true). Probability = α. Type II = false negative.|ar:خطأ النوع الأول = إيجابية كاذبة. احتماله = α. النوع الثاني = سلبية كاذبة.|fil:Type I = false positive (pagtanggi sa H₀ kapag ito ay totoo). Probability = α."},
+  {t:"Forecasting",d:2,en:"In exponential smoothing, α close to 1 means:",ar:"في التمهيد الأسي، α قريب من 1 يعني:",fil:"Sa exponential smoothing, α na malapit sa 1 ay nangangahulugang:",o:["en:More weight on older observations|ar:وزن أكبر للملاحظات القديمة|fil:Mas mabigat ang timbang sa mas lumang obserbasyon","en:More weight on recent observations|ar:وزن أكبر للملاحظات الحديثة|fil:Mas mabigat ang timbang sa mga kamakailangang obserbasyon","en:Equal weight on all observations|ar:وزن متساوٍ للجميع|fil:Pantay na timbang sa lahat","en:Forecast equals last observation|ar:التنبؤ يساوي آخر ملاحظة|fil:Ang forecast ay katumbas ng huling obserbasyon"],a:1,ex:"en:α near 1 = reactive model (emphasizes recent data); α near 0 = stable model (weights history heavily).|ar:α قريب من 1 = نموذج متفاعل يُركز على البيانات الحديثة.|fil:α malapit sa 1 = reactive na modelo (nagbibigay-diin sa kamakailang datos)."},
+  {t:"Business Analytics",d:2,en:"A company has ROI of 150%. This means:",ar:"شركة لديها ROI بنسبة 150%. هذا يعني:",fil:"Ang isang kumpanya ay may ROI na 150%. Nangangahulugan ito ng:",o:["en:Lost 150% of initial investment|ar:خسرت 150% من الاستثمار|fil:Nawala ang 150% ng puhunan","en:Gained 1.5× the investment as profit|ar:ربحت 1.5 ضعف الاستثمار كربح|fil:Nakakuha ng 1.5× ng puhunan bilang kita","en:Revenue equals 150% of costs|ar:الإيرادات = 150% من التكاليف|fil:Ang kita ay 150% ng gastos","en:Investment grew by 50%|ar:الاستثمار نما بنسبة 50%|fil:Lumago ang puhunan ng 50%"],a:1,ex:"en:ROI = (Net Profit / Cost) × 100. ROI 150% = for every $1 invested, you earned $1.50 profit ($2.50 total return).|ar:ROI = (صافي الربح / التكلفة) × 100. ROI 150% = لكل $1 مستثمر، ربحت $1.50.|fil:ROI = (Net Profit / Cost) × 100. ROI 150% = para sa $1 na puhunan, kumita ng $1.50."},
+  {t:"Statistics",d:2,en:"To compare proportions between two independent groups, use:",ar:"لمقارنة النسب بين مجموعتين مستقلتين، استخدم:",fil:"Para ihambing ang mga proporsyon sa dalawang independyenteng grupo, gumamit ng:",o:["en:Paired t-test|ar:اختبار t المزدوج|fil:Paired t-test","en:Chi-square test|ar:اختبار مربع كاي|fil:Chi-square test","en:ANOVA|ar:تحليل التباين|fil:ANOVA","en:F-test|ar:اختبار F|fil:F-test"],a:1,ex:"en:Chi-square test compares categorical outcomes between groups — tests if observed frequencies differ from expected.|ar:اختبار مربع كاي يقارن النتائج الفئوية بين المجموعات.|fil:Ang chi-square test ay naghahambing ng mga kategoryang resulta sa pagitan ng mga grupo."},
+  {t:"Regression",d:2,en:"R² = 0.80 in regression means:",ar:"R² = 0.80 في الانحدار يعني:",fil:"Ang R² = 0.80 sa regression ay nangangahulugang:",o:["en:The model predicts 80% of outcomes correctly|ar:النموذج يتنبأ بـ80% من النتائج بشكل صحيح|fil:Hinuhulaan ng modelo ang 80% nang tama","en:80% of variance in Y is explained by the model|ar:80% من تباين Y يفسره النموذج|fil:80% ng variance sa Y ay ipinaliwanag ng modelo","en:The correlation is 0.80|ar:الارتباط هو 0.80|fil:Ang korelasyon ay 0.80","en:20% prediction error rate|ar:معدل خطأ 20%|fil:20% ang error rate"],a:1,ex:"en:R² measures the proportion of Y's variance explained by the model. R²=0.80 = model captures 80% of Y's variation.|ar:R² يقيس نسبة تباين Y الذي يفسره النموذج. R²=0.80 يعني التقاط 80% من تباين Y.|fil:Sinusukat ng R² ang proporsyon ng variance ng Y. R²=0.80 = 80% ng variation ng Y."},
+  {t:"Finance Analytics",d:2,en:"Net Present Value (NPV) > 0 indicates:",ar:"صافي القيمة الحالية (NPV) > 0 يدل على:",fil:"Ang NPV > 0 ay nagpapahiwatig ng:",o:["en:The project will break even|ar:المشروع سيصل لنقطة التعادل|fil:Maaabot ng proyekto ang break-even","en:The investment destroys value|ar:الاستثمار يدمر القيمة|fil:Sinisira ng puhunan ang halaga","en:The investment creates value — accept it|ar:الاستثمار يخلق قيمة — اقبله|fil:Lumilikha ng halaga ang puhunan — tanggapin ito","en:Cash flows equal initial investment|ar:التدفقات تساوي الاستثمار|fil:Ang cash flows ay katumbas ng paunang puhunan"],a:2,ex:"en:NPV > 0: present value of future cash flows exceeds initial investment. Accept projects with positive NPV.|ar:NPV > 0 يعني أن القيمة الحالية للتدفقات تتجاوز الاستثمار الأولي. اقبل المشاريع ذات NPV الإيجابي.|fil:NPV > 0: ang present value ng mga cash flow sa hinaharap ay higit sa paunang puhunan."},
+  {t:"Operations",d:2,en:"Six Sigma aims to reduce defects to:",ar:"تهدف Six Sigma إلى تقليل العيوب إلى:",fil:"Ang Six Sigma ay naglalayong bawasan ang mga depekto sa:",o:["en:Less than 1% of output|ar:أقل من 1% من الإنتاج|fil:Mas mababa sa 1% ng output","en:3.4 defects per million opportunities|ar:3.4 عيب لكل مليون فرصة|fil:3.4 na depekto bawat isang milyong pagkakataon","en:Zero defects in all processes|ar:صفر عيوب|fil:Zero depekto","en:Less than 10 defects per thousand|ar:أقل من 10 عيوب لكل ألف|fil:Mas mababa sa 10 depekto bawat isang libo"],a:1,ex:"en:Six Sigma = 3.4 DPMO, corresponding to 99.99966% accuracy — essentially near-perfect quality.|ar:Six Sigma = 3.4 عيب لكل مليون فرصة. يتوافق مع دقة 99.99966%.|fil:Six Sigma = 3.4 DPMO, katumbas ng 99.99966% na katumpakan."},
+  {t:"Expert Case",d:3,en:"ANOVA result: 3 regions, F=4.2, p=0.03, α=0.05. Correct conclusion?",ar:"نتيجة ANOVA: 3 مناطق، F=4.2، p=0.03، α=0.05. الاستنتاج الصحيح؟",fil:"Resulta ng ANOVA: 3 rehiyon, F=4.2, p=0.03, α=0.05. Tamang konklusyon?",o:["en:No significant difference between regions|ar:لا فرق معنوي بين المناطق|fil:Walang makabuluhang pagkakaiba","en:At least one region's mean differs significantly|ar:متوسط منطقة واحدة على الأقل يختلف معنوياً|fil:Hindi bababa sa isang rehiyon ay makabuluhang naiiba","en:North is significantly better than others|ar:الشمال أفضل معنوياً من كليهما|fil:Ang Hilaga ay makabuluhang mas mahusay","en:Test is invalid due to unequal means|ar:الاختبار غير صالح لعدم تساوي المتوسطات|fil:Hindi wasto ang pagsubok"],a:1,ex:"en:p=0.03 < α=0.05 → Reject H₀. Significant difference exists. But ANOVA only says 'at least one differs' — post-hoc tests identify which pairs.|ar:p=0.03 < α=0.05 → رفض H₀. لكن ANOVA تُخبرنا فقط 'واحدة تختلف على الأقل' — نحتاج اختبارات ما بعد الحقيقة.|fil:p=0.03 < α=0.05 → Tanggihan ang H₀. Ngunit sinasabi lamang ng ANOVA na 'hindi bababa sa isa ang naiiba'."},
+  {t:"Expert Case",d:3,en:"Regression: β=2.3, p<0.001, R²=0.68. Manager increases ad spend by $10k. Predicted sales increase?",ar:"الانحدار: β=2.3، p<0.001، R²=0.68. المدير يزيد الإنفاق الإعلاني بـ$10k. الزيادة المتوقعة في المبيعات؟",fil:"Regression: β=2.3, p<0.001, R²=0.68. Dagdag na $10k sa ad spend. Hinulaang pagtaas ng benta?",o:["en:$2,300|ar:$2,300|fil:$2,300","en:$23,000|ar:$23,000|fil:$23,000","en:$6,800|ar:$6,800|fil:$6,800","en:$0.40|ar:$0.40|fil:$0.40"],a:1,ex:"en:β=2.3: for every $1 increase in ad spend, sales increase by $2.3. $10,000 × 2.3 = $23,000 sales increase.|ar:β=2.3: لكل $1 إنفاق إعلاني، تزيد المبيعات بـ$2.3. $10,000 × 2.3 = $23,000.|fil:β=2.3: para sa bawat $1 na ad spend, tataas ang benta ng $2.3. $10,000 × 2.3 = $23,000."},
+  {t:"Expert Case",d:3,en:"HR: avg tenure=3.2 yrs, σ=1.1, n=64. 95% CI margin of error?",ar:"HR: متوسط مدة الخدمة=3.2 سنة، σ=1.1، n=64. هامش خطأ فترة الثقة 95%؟",fil:"HR: avg tenure=3.2 taon, σ=1.1, n=64. 95% CI margin of error?",o:["en:±0.14 yrs|ar:±0.14 سنة|fil:±0.14 taon","en:±0.27 yrs|ar:±0.27 سنة|fil:±0.27 taon","en:±1.10 yrs|ar:±1.10 سنة|fil:±1.10 taon","en:±0.55 yrs|ar:±0.55 سنة|fil:±0.55 taon"],a:1,ex:"en:ME = z × (σ/√n) = 1.96 × (1.1/8) = 1.96 × 0.1375 = 0.27. So 95% CI = 3.2 ± 0.27 = [2.93, 3.47] yrs.|ar:ME = 1.96 × (1.1/√64) = 1.96 × 0.1375 = 0.27. فترة الثقة: [2.93، 3.47] سنوات.|fil:ME = 1.96 × (1.1/8) = 0.27. Kaya ang 95% CI = 3.2 ± 0.27."},
+  {t:"Expert Case",d:3,en:"A/B test: A converts 8% (n=500), B converts 11% (n=500), z=2.1, p=0.036, α=0.05. Should you deploy B?",ar:"اختبار A/B: A يحوّل 8%، B يحوّل 11%، p=0.036، α=0.05. هل تطرح B؟",fil:"A/B test: A ay 8%, B ay 11%, p=0.036, α=0.05. Dapat bang i-deploy ang B?",o:["en:No — p > α so no difference|ar:لا، p > α لذا لا فرق|fil:Hindi — p > α kaya walang pagkakaiba","en:Yes — statistically significant improvement|ar:نعم — تحسن ذو دلالة إحصائية|fil:Oo — statistically significant na pagpapabuti","en:Need more data before concluding|ar:تحتاج بيانات أكثر|fil:Kailangan ng mas maraming datos","en:Difference is not practically significant|ar:الفرق ليس ذا أهمية عملية|fil:Ang pagkakaiba ay hindi practically significant"],a:1,ex:"en:p=0.036 < α=0.05 → significant. Version B's 11% vs 8% = 37.5% relative lift. Deploy B.|ar:p=0.036 < 0.05 → معنوي. B = 11% مقابل 8% = تحسن نسبي 37.5%. اطرح B.|fil:p=0.036 < α=0.05 → significant. Ang B ay 37.5% na kamag-anak na pagpapabuti. I-deploy ang B."},
+  {t:"Expert Case",d:3,en:"Marketing model: TV β=0.45 (p=0.001), Digital β=0.38 (p=0.002), Print β=0.12 (p=0.31), R²=0.79. Budget advice?",ar:"نموذج تسويقي: TV β=0.45 (p=0.001)، Digital β=0.38 (p=0.002)، Print β=0.12 (p=0.31)، R²=0.79. توصية الميزانية؟",fil:"Marketing model: TV β=0.45 (p=0.001), Digital β=0.38 (p=0.002), Print β=0.12 (p=0.31), R²=0.79. Payo sa budget?",o:["en:Invest equally in all three|ar:استثمر بالتساوي في الثلاثة|fil:Mamuhunan nang pantay sa tatlo","en:Prioritize TV and Digital; reconsider Print|ar:أولوية لـTV والرقمي؛ أعد النظر في المطبوعات|fil:Unahin ang TV at Digital; muling isaalang-alang ang Print","en:Focus only on Print (underutilized)|ar:ركز على المطبوعات فقط|fil:Mag-focus lamang sa Print","en:Reduce all spending|ar:قلل جميع الإنفاق|fil:Bawasan ang lahat ng gastos"],a:1,ex:"en:TV (p=0.001) and Digital (p=0.002) are statistically significant. Print (p=0.31) is NOT significant — reallocate Print budget to TV/Digital.|ar:TV وDigital معنويان. Print (p=0.31) غير معنوي — أعد توزيع ميزانيته على TV/Digital.|fil:Ang TV at Digital ay statistically significant. Ang Print (p=0.31) ay HINDI significant — ilipat ang budget nito."}
+];
+
+let lang='en',state={},currentMode=null,currentQs=[],qIndex=0,score=0,correct=0,streak=0,bestStreak=0,timer=null,timeLeft=30,answered=false,lastMode=null;
+
+function loadState(){
+  try{const s=localStorage.getItem('dq_state2');if(s)state=JSON.parse(s);else resetState();}
+  catch(e){resetState();}
+}
+function resetState(){state={name:'',xp:0,totalAnswered:0,bestStreak:0,rounds:0,badges:[],rankIndex:0};}
+function saveState(){try{localStorage.setItem('dq_state2',JSON.stringify(state));}catch(e){}}
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.body.style.direction=l==='ar'?'rtl':'ltr';
+  document.documentElement.lang=l;
+  updateHomeUI();
+}
+function txt(key){return T[lang]&&T[lang][key]!==undefined?T[lang][key]:(T['en'][key]||key);}
+function updateHomeUI(){
+  document.getElementById('homeTitle').textContent=txt('title');
+  document.getElementById('homeSub').textContent=txt('sub');
+  document.getElementById('nameLabel').textContent=txt('nameLabel');
+  document.getElementById('startBtn').textContent=txt('startBtn');
+  document.getElementById('answeredLbl').textContent=txt('answeredLbl');
+  document.getElementById('totalXP').textContent=state.xp||0;
+  document.getElementById('totalQ').textContent=state.totalAnswered||0;
+  document.getElementById('totalStreak').textContent=state.bestStreak||0;
+  document.getElementById('startRankLabel').textContent=txt('rankNames')[getRankIndex(state.xp)];
+  if(state.name)document.getElementById('playerName').value=state.name;
+}
+function getRankIndex(xp){let i=0;for(let r=0;r<RANKS.length;r++)if((xp||0)>=RANKS[r].xp)i=r;return i;}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='modeScreen')updateModeScreen();
+  if(id==='rankScreen')updateRankScreen();
+}
+function startGame(){
+  const n=document.getElementById('playerName').value.trim()||'Player';
+  state.name=n;saveState();showScreen('modeScreen');
+}
+function updateModeScreen(){
+  document.getElementById('modePlayer').textContent=state.name||'Player';
+  document.getElementById('modeGreet').textContent=txt('modeGreet');
+  document.getElementById('navRanking').textContent=txt('navRanking');
+  document.getElementById('navBadges').textContent=txt('navBadges');
+  document.getElementById('navHome').textContent=txt('navHome');
+  const ri=getRankIndex(state.xp);
+  document.getElementById('modeRankChip').textContent=RANKS[ri].icon+' '+txt('rankNames')[ri].split(' ')[0];
+  const next=RANKS[Math.min(ri+1,RANKS.length-1)];
+  const pct=ri===RANKS.length-1?100:Math.min(100,Math.round(((state.xp-RANKS[ri].xp)/(next.xp-RANKS[ri].xp))*100));
+  document.getElementById('xpFill').style.width=pct+'%';
+  document.getElementById('xpBarVal').textContent=state.xp+' XP';
+  const grid=document.getElementById('modesGrid');
+  const modes=txt('modes');
+  grid.innerHTML=modes.map((m,i)=>`<div class="mode-card${m.locked?' locked':''}" onclick="${m.locked?'showToast(\'Reach Senior Analyst to unlock!\')':'playMode('+i+')'}"><div class="mode-icon">${m.icon}</div>${m.badge?`<div class="mode-badge${m.badge==='🔒'?' lock':''}">${m.badge}</div>`:''}<div class="mode-title">${m.title}</div><div class="mode-desc">${m.desc}</div></div>`).join('');
+}
+const MODE_CONFIG=[{qs:10,time:30,diff:[0,1,2],xpMult:1},{qs:8,time:45,diff:[1,2],xpMult:1.3},{qs:10,time:40,diff:[1,2,3],xpMult:1.5},{qs:8,time:50,diff:[2,3],xpMult:1.8},{qs:20,time:15,diff:[0,1,2],xpMult:1.2},{qs:5,time:60,diff:[3],xpMult:2.5}];
+function playMode(modeIdx){
+  lastMode=modeIdx;currentMode=MODE_CONFIG[modeIdx];
+  currentQs=Q.filter(q=>currentMode.diff.includes(q.d)).sort(()=>Math.random()-0.5).slice(0,currentMode.qs);
+  qIndex=0;score=0;correct=0;streak=0;bestStreak=0;answered=false;
+  showScreen('gameScreen');
+  document.getElementById('qTotal').textContent=currentQs.length;
+  loadQuestion();
+}
+function loadQuestion(){
+  if(qIndex>=currentQs.length){endRound();return;}
+  const q=currentQs[qIndex];
+  answered=false;
+  document.getElementById('qNum').textContent=qIndex+1;
+  document.getElementById('progressQFill').style.width=((qIndex/currentQs.length)*100)+'%';
+  document.getElementById('qTopic').textContent=q.t;
+  const diffs=['diff-beginner','diff-intermediate','diff-advanced','diff-expert'];
+  const dl=document.getElementById('qDiff');
+  dl.className='q-difficulty '+diffs[q.d];
+  dl.textContent=txt('difficulty')[q.d];
+  document.getElementById('qText').textContent=q[lang]||q.en;
+  document.getElementById('scoreLive').textContent='Score: '+score+' pts';
+  document.getElementById('streakChip').textContent='🔥 '+streak;
+  document.getElementById('explainBox').className='explain-box';
+  document.getElementById('btnNext').className='btn-next';
+  const og=document.getElementById('optionsGrid');
+  og.innerHTML=q.o.map((opt,i)=>{
+    const optText=opt.split('|').find(p=>p.startsWith(lang+':'))?.slice(lang.length+1)||opt.split('|')[0].slice(3);
+    return`<button class="option-btn" onclick="answer(${i})">${String.fromCharCode(65+i)}. ${optText}</button>`;
+  }).join('');
+  timeLeft=currentMode.time;
+  document.getElementById('timerNum').textContent=timeLeft;
+  document.getElementById('timerNum').style.color='var(--gold)';
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timerNum').textContent=timeLeft;
+    if(timeLeft<=5)document.getElementById('timerNum').style.color='var(--red)';
+    if(timeLeft<=0){clearInterval(timer);timeoutQ();}
+  },1000);
+}
+function answer(idx){
+  if(answered)return;answered=true;clearInterval(timer);
+  const q=currentQs[qIndex];
+  const btns=document.querySelectorAll('.option-btn');
+  btns.forEach(b=>b.disabled=true);
+  const isRight=idx===q.a;
+  const timeBonusPct=Math.round((timeLeft/currentMode.time)*100);
+  const pts=isRight?Math.max(50,100+timeBonusPct):0;
+  btns[idx].className='option-btn '+(isRight?'correct':'wrong');
+  if(!isRight)btns[q.a].className='option-btn reveal';
+  if(isRight){
+    correct++;streak++;score+=pts;
+    if(streak>bestStreak)bestStreak=streak;
+    if(streak>=5)showCombo(streak+'x COMBO!');
+    showToast(txt('correct')+' +'+pts+'pts');
+    checkBadge('first_blood');
+    if(streak>=5)checkBadge('streak5');
+    if(streak>=10)checkBadge('streak10');
+    if(timeLeft>currentMode.time-5)checkBadge('speedster');
+  }else{streak=0;showToast(txt('wrong'));}
+  const exKey=q.ex;
+  const exText=exKey.split('|').find(p=>p.startsWith(lang+':'))?.slice(lang.length+1)||exKey.split('|')[0].slice(3);
+  document.getElementById('explainBox').textContent='💡 '+exText;
+  document.getElementById('explainBox').className='explain-box show';
+  document.getElementById('btnNext').textContent=txt('nextBtn');
+  document.getElementById('btnNext').className='btn-next show';
+  document.getElementById('scoreLive').textContent='Score: '+score+' pts';
+  document.getElementById('streakChip').textContent='🔥 '+streak;
+  document.getElementById('progressBar').style.width=((qIndex+1)/currentQs.length*100)+'%';
+}
+function timeoutQ(){
+  if(answered)return;answered=true;
+  const q=currentQs[qIndex];
+  document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.option-btn')[q.a].className='option-btn reveal';
+  streak=0;showToast(txt('timeout'));
+  const exKey=q.ex;
+  const exText=exKey.split('|').find(p=>p.startsWith(lang+':'))?.slice(lang.length+1)||exKey.split('|')[0].slice(3);
+  document.getElementById('explainBox').textContent='💡 '+exText;
+  document.getElementById('explainBox').className='explain-box show';
+  document.getElementById('btnNext').textContent=txt('nextBtn');
+  document.getElementById('btnNext').className='btn-next show';
+}
+function nextQuestion(){qIndex++;loadQuestion();}
+function quitGame(){clearInterval(timer);showScreen('modeScreen');}
+function endRound(){
+  clearInterval(timer);
+  document.getElementById('progressBar').style.width='100%';
+  const accuracy=Math.round((correct/currentQs.length)*100);
+  const xpEarned=Math.round(score*(currentMode.xpMult||1));
+  const oldRank=getRankIndex(state.xp);
+  state.xp=(state.xp||0)+xpEarned;
+  state.totalAnswered=(state.totalAnswered||0)+currentQs.length;
+  state.rounds=(state.rounds||0)+1;
+  if(bestStreak>(state.bestStreak||0))state.bestStreak=bestStreak;
+  const newRank=getRankIndex(state.xp);
+  if(accuracy===100)checkBadge('perfect');
+  if(state.totalAnswered>=50)checkBadge('scholar');
+  if(state.totalAnswered>=100)checkBadge('centurion');
+  if(state.rounds>=10)checkBadge('marathon');
+  if(newRank>=3)checkBadge('ranker');
+  if(lastMode===2)checkBadge('stats_master');
+  if(lastMode===3)checkBadge('detective');
+  saveState();
+  const icons=['😢','😐','🙂','😊','🎉','🏆'];
+  document.getElementById('resultIcon').textContent=icons[Math.min(5,Math.floor(accuracy/20))];
+  document.getElementById('resultTitle').textContent=txt('resultTitle');
+  document.getElementById('resultRank').textContent=RANKS[newRank].icon+' '+txt('rankNames')[newRank];
+  document.getElementById('rScore').textContent=score;
+  document.getElementById('rCorrect').textContent=correct+'/'+currentQs.length;
+  document.getElementById('rAccuracy').textContent=accuracy+'%';
+  document.getElementById('rScoreLbl').textContent=txt('rScoreLbl');
+  document.getElementById('rCorrectLbl').textContent=txt('rCorrectLbl');
+  document.getElementById('rAccLbl').textContent=txt('rAccLbl');
+  document.getElementById('xpGain').textContent='+'+xpEarned+' '+txt('xpGain');
+  document.getElementById('btnModes').textContent=txt('btnModes');
+  document.getElementById('btnReplay').textContent=txt('btnReplay');
+  const rum=document.getElementById('rankUpMsg');
+  if(newRank>oldRank){rum.textContent='🎉 '+txt('rankNames')[newRank]+' UNLOCKED!';rum.className='rank-up-msg show';}
+  else rum.className='rank-up-msg';
+  setTimeout(()=>document.getElementById('progressBar').style.width='0%',1500);
+  showScreen('resultScreen');
+}
+function replayMode(){if(lastMode!==null)playMode(lastMode);}
+function updateRankScreen(){
+  document.getElementById('rankScreenTitle').textContent=txt('rankScreenTitle');
+  document.getElementById('badgesTitle').textContent=txt('badgesTitle');
+  document.getElementById('rankTableTitle').textContent=txt('rankTableTitle');
+  const ri=getRankIndex(state.xp);
+  document.getElementById('rankTableRows').innerHTML=RANKS.map((r,i)=>`<div class="req-row" style="${i===ri?'color:var(--gold);font-weight:700;':i<ri?'opacity:0.5;':''}"><span>${r.icon} ${txt('rankNames')[i]}</span><span>${i===ri?'← You':r.xp+' XP'}</span></div>`).join('');
+  document.getElementById('badgesGrid').innerHTML=BADGES.map(b=>{
+    const earned=(state.badges||[]).includes(b.id);
+    return`<div class="badge-item${earned?' earned':' locked'}"><div class="badge-ico">${b.icon}</div><div class="badge-lbl">${b.label}</div></div>`;
+  }).join('');
+}
+function checkBadge(id){
+  if(!(state.badges||[]).includes(id)){
+    state.badges=state.badges||[];state.badges.push(id);
+    const b=BADGES.find(x=>x.id===id);
+    if(b)showToast('🎖 Badge: '+b.label);
+  }
+}
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast show';
+  setTimeout(()=>t.className='toast',2000);
+}
+function showCombo(msg){
+  const c=document.getElementById('comboFlash');c.textContent=msg;c.className='combo-flash show';
+  setTimeout(()=>c.className='combo-flash',800);
+}
+loadState();updateHomeUI();
+</script>
+</body>
+</html>
